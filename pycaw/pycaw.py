@@ -502,9 +502,10 @@ class AudioDevice(object):
     """
     http://stackoverflow.com/a/20982715/185510
     """
-    def __init__(self, id, state, properties):
-        self.id = id
-        self.state = state
+    def __init__(self, dev, properties):
+        self.dev = dev
+        self.id = dev.GetId()
+        self.state = dev.GetState()
         self.properties = properties
 
     def __str__(self):
@@ -677,7 +678,7 @@ class AudioUtilities(object):
                 name = str(pk)
                 properties[name] = v
         audioState = AudioDeviceState(state)
-        return AudioDevice(id, audioState, properties)
+        return AudioDevice(dev, properties)
 
     @staticmethod
     def GetAllDevices():
