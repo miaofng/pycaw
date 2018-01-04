@@ -6,7 +6,7 @@ import psutil
 import comtypes
 from enum import Enum
 from ctypes import HRESULT, POINTER, Structure, Union, \
-    c_uint32, c_longlong, c_float
+    c_uint32, c_longlong, c_float, cast
 from ctypes.wintypes import BOOL, VARIANT_BOOL, WORD, DWORD, \
     UINT, INT, LONG, ULARGE_INTEGER, LPWSTR, LPCWSTR
 from comtypes import IUnknown, GUID, COMMETHOD
@@ -507,6 +507,9 @@ class AudioDevice(object):
         self.id = dev.GetId()
         self.state = dev.GetState()
         self.properties = properties
+
+        interface = dev.Activate(IAudioEndpointVolume._iid_, comtypes.CLSCTX_ALL, None)
+        self.volume = cast(interface, POINTER(IAudioEndpointVolume))
 
     def __str__(self):
         return "AudioDevice: %s" % (self.FriendlyName)
