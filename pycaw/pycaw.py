@@ -505,11 +505,14 @@ class AudioDevice(object):
     def __init__(self, dev, properties):
         self.dev = dev
         self.id = dev.GetId()
-        self.state = dev.GetState()
+        self.state = AudioDeviceState(dev.GetState())
         self.properties = properties
 
-        interface = dev.Activate(IAudioEndpointVolume._iid_, comtypes.CLSCTX_ALL, None)
-        self.volume = cast(interface, POINTER(IAudioEndpointVolume))
+        #some audio device may not available
+        #such as hdmi sound card only when hdmi is connected
+        if self.state == AudioDeviceState.Active:
+            interface = dev.Activate(IAudioEndpointVolume._iid_, comtypes.CLSCTX_ALL, None)
+            self.volume = cast(interface, POINTER(IAudioEndpointVolume))
 
     def __str__(self):
         return "AudioDevice: %s" % (self.FriendlyName)
@@ -666,8 +669,6 @@ class AudioUtilities(object):
     def CreateDevice(dev):
         if dev is None:
             return None
-        id = dev.GetId()
-        state = dev.GetState()
         properties = {}
         store = dev.OpenPropertyStore(STGM.STGM_READ.value)
         if store is not None:
@@ -680,7 +681,6 @@ class AudioUtilities(object):
                 # PropVariantClear(byref(value))
                 name = str(pk)
                 properties[name] = v
-        audioState = AudioDeviceState(state)
         return AudioDevice(dev, properties)
 
     @staticmethod
