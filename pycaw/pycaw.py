@@ -684,7 +684,7 @@ class AudioUtilities(object):
         return AudioDevice(dev, properties)
 
     @staticmethod
-    def GetAllDevices():
+    def GetAllDevices(exist_only = False):
         devices = []
         deviceEnumerator = comtypes.CoCreateInstance(
             CLSID_MMDeviceEnumerator,
@@ -702,5 +702,10 @@ class AudioUtilities(object):
         for i in range(count):
             dev = collection.Item(i)
             if dev is not None:
-                devices.append(AudioUtilities.CreateDevice(dev))
+				yes = True
+				if exist_only:
+					state = AudioDeviceState(dev.GetState())
+					yes = (state == AudioDeviceState.Active)
+				if yes:
+					devices.append(AudioUtilities.CreateDevice(dev))
         return devices
